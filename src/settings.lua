@@ -24,13 +24,13 @@ data:extend({
         name = "nebular-eclipse-noise-scale",
         setting_type = "runtime-global",
         minimum_value = 1,
-        default_value = 2
+        default_value = 5
     },{
         type = "int-setting",
         name = "nebular-eclipse-noise-octaves",
         setting_type = "runtime-global",
         minimum_value = 1,
-        default_value = 4
+        default_value = 2
     },{
         type = "double-setting",
         name = "nebular-eclipse-noise-lacunarity",
@@ -52,7 +52,7 @@ data:extend({
         type = "double-setting",
         name = "nebular-eclipse-voronoi-distortion-impact",
         setting_type = "runtime-global",
-        default_value = 2,
+        default_value = 5,
         minimum_value = 0
     }
 })
