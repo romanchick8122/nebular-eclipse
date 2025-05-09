@@ -52,7 +52,7 @@ data:extend({
         type = "double-setting",
         name = "nebular-eclipse-voronoi-distortion-impact",
         setting_type = "runtime-global",
-        default_value = 5,
+        default_value = 2,
         minimum_value = 0
     }
 })

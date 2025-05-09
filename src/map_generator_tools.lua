@@ -10,43 +10,14 @@ function map_cleanup()
         default_enable_all_autoplace_controls = false,
         autoplace_settings = {},
         seed = 0,
-        width = 1,
-        height = 1,
+        width = 0,
+        height = 0,
         starting_area = "none",
         starting_points={{x=0,y=0}},
         peaceful_mode = true,
         no_enemies_mode = true
     }
-    for chunk in surface.get_chunks() do
-        if chunk.x < -1 or chunk.x > 0 or chunk.y < -1 or chunk.y > 0 then
-            surface.delete_chunk({chunk.x, chunk.y})
-        end
-    end
-    tiles = {}
-    local v = voronoi_init(settings.global["nebular-eclipse-voronoi-cells-per-chunk"].value)
-    local noise_offset_scale = settings.global["nebular-eclipse-voronoi-distortion-impact"].value
-    local gettile = function(x, y)
-        if x < -1 or x > 0 or y < -1 or y > 0 then
-            local noise_vx = octave_noise(x, y, storage["noise_seeds_x"])
-            local noise_vy = octave_noise(x, y, storage["noise_seeds_y"])
-            return voronoi_closest_seed(v, x + noise_vx * noise_offset_scale, y + noise_vy * noise_offset_scale).active and "water" or "grass-1"
-        else
-            return default_tile
-        end
-    end
-    for i=-32,31 do
-        for j=-32,31 do
-            table.insert(tiles, {position={i,j},name=gettile(i,j)})
-        end
-    end
     game.forces["player"].set_spawn_position({0, 0}, "nauvis")
-    surface.set_tiles(tiles)
-    surface.destroy_decoratives({{-32, -32},{31, 31}})
-
-
-
-    
-    surface.set_tiles(map(v.seeds[0][0], function(x) return {position=x.pos,name=(x.active and "water" or "grass-1")} end))
 end
 function remove_spaceship_wreck()
     local surface = game.surfaces["nauvis"]
@@ -55,8 +26,33 @@ function remove_spaceship_wreck()
             e.destroy()
         end
     end
-end
 
+
+    
+
+    local v = voronoi_init(settings.global["nebular-eclipse-voronoi-cells-per-chunk"].value)
+    local function set_tile_group(tilename)
+        local seed_at_0 = voronoi_closest_seed(v, 0, 0, false)
+        local seeds = voronoi_expand_seed(v,seed_at_0,10)
+        surface.set_tiles(map(voronoi_get_tileset(v, seeds), function(pos) return {position=pos,name=tilename} end), true, false)
+        for i,seed in ipairs(seeds) do
+            surface.set_tiles({{position=seed.pos,name="lab-white"}}, true, false)
+            seed.assigned=true
+        end
+    end
+    commands.add_command("ne-add-area", nil, function(command)
+        set_tile_group(command.parameter)
+    end)
+end
+script.on_event(defines.events.on_chunk_generated, function(e)
+    local tiles = {}
+    for x = e.area.left_top.x, e.area.right_bottom.x do for y = e.area.left_top.y,e.area.right_bottom.y do
+        if (x * x + y * y) > 4 then
+            table.insert(tiles, {position={x, y}, name="out-of-map"})
+        end
+    end end
+    game.surfaces["nauvis"].set_tiles(tiles)
+end)
 script.on_event(defines.events.on_cutscene_started, function()
     local int_max = 2^31 - 1 + 2^31
     storage["main_rng"] = game.create_random_generator()
