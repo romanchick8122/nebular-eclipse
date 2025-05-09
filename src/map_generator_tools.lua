@@ -1,3 +1,4 @@
+local default_tile = settings.global["nebular-eclipse-default-tile-name"].value
 function map_cleanup()
     local surface = game.surfaces["nauvis"]
     surface.map_gen_settings = {
@@ -22,7 +23,7 @@ function map_cleanup()
         if x < -1 or x > 0 or y < -1 or y > 0 then
             return "out-of-map"
         else
-            return "grass-1"
+            return default_tile
         end
     end
     for i=-32,31 do
