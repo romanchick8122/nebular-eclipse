@@ -1,3 +1,6 @@
+require("map_gen.noise_source")
+require("util")
+
 local default_tile = settings.global["nebular-eclipse-default-tile-name"].value
 function map_cleanup()
     local surface = game.surfaces["nauvis"]
@@ -21,7 +24,11 @@ function map_cleanup()
     tiles = {}
     local gettile = function(x, y)
         if x < -1 or x > 0 or y < -1 or y > 0 then
-            return "out-of-map"
+            if white_noise(x, y, storage["tile_seed"]) > 2^31 then
+                return "out-of-map"
+            else 
+                return default_tile
+            end
         else
             return default_tile
         end
@@ -43,6 +50,11 @@ function remove_spaceship_wreck()
         end
     end
 end
-script.on_init(map_cleanup)
+
+script.on_event(defines.events.on_cutscene_started, function()
+    storage["main_rng"] = game.create_random_generator()
+    storage["tile_seed"] = storage["main_rng"](1000000000) -- Not really int max but who cares
+    map_cleanup()
+end)
 script.on_event(defines.events.on_cutscene_finished, remove_spaceship_wreck)
 script.on_event(defines.events.on_cutscene_cancelled, remove_spaceship_wreck)
