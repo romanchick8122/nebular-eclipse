@@ -2,7 +2,7 @@ require("noise_source")
 local nop = {}
 
 function voronoi_init(seeds_per_chunk)
-    return { seeds = {}, seeds_per_chunk = seeds_per_chunk}
+    return { seeds = {}, seeds_per_chunk = seeds_per_chunk, try_continue_seeds = {}}
 end
 local function voronoi_mk_seeds(state, x, y)
     if state.seeds[x] and state.seeds[x][y] then
@@ -88,6 +88,31 @@ function voronoi_expand_seed(state,seed,count)
     end
     for i,sd in ipairs(result) do
         sd.disabled = false
+    end
+    return result
+end
+function voronoi_get_map_expansion_tiles(state)
+
+    local continue_seed_index = nil
+    local expansion_seed = nil
+    while not expansion_seed do
+        if continue_seed_index then
+            local ln = #state.try_continue_seeds
+            state.try_continue_seeds[continue_seed_index] = state.try_continue_seeds[ln]
+            state.try_continue_seeds[ln] = nil
+        end
+        if #(state.try_continue_seeds) == 0 then
+            table.insert(state.try_continue_seeds, voronoi_closest_seed(state, 0, 0))
+        end
+        continue_seed_index = storage["voronoi_rng"](#(state.try_continue_seeds))
+        local pos = state.try_continue_seeds[continue_seed_index].pos
+        expansion_seed = voronoi_closest_seed(state, pos[1], pos[2], false)
+    end
+    local seeds = voronoi_expand_seed(state,expansion_seed,settings.global["nebular-eclipse-voronoi-cells-per-expansion"].value)
+    local result = voronoi_get_tileset(state, seeds)
+    for i,seed in ipairs(seeds) do
+        seed.assigned=true
+        table.insert(state.try_continue_seeds, seed)
     end
     return result
 end

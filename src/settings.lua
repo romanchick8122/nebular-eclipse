@@ -54,5 +54,11 @@ data:extend({
         setting_type = "runtime-global",
         default_value = 5,
         minimum_value = 0
+    },{
+        type = "int-setting",
+        name = "nebular-eclipse-voronoi-cells-per-expansion",
+        setting_type = "runtime-global",
+        default_value = 5,
+        minimum_value = 1
     }
 })
