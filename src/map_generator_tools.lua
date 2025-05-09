@@ -24,7 +24,7 @@ function map_cleanup()
     tiles = {}
     local gettile = function(x, y)
         if x < -1 or x > 0 or y < -1 or y > 0 then
-            if white_noise(x, y, storage["tile_seed"]) > 2^31 then
+            if octave_noise(x, y, storage["noise_seeds"]) > 0 then
                 return "out-of-map"
             else 
                 return default_tile
@@ -52,8 +52,14 @@ function remove_spaceship_wreck()
 end
 
 script.on_event(defines.events.on_cutscene_started, function()
+    local int_max = 2^31 - 1 + 2^31
     storage["main_rng"] = game.create_random_generator()
-    storage["tile_seed"] = storage["main_rng"](1000000000) -- Not really int max but who cares
+    storage["tile_seed"] = storage["main_rng"](int_max)
+    local seeds = {}
+    for i=0,settings.global["nebular-eclipse-noise-octaves"].value do
+        table.insert(seeds, storage["main_rng"](int_max))
+    end
+    storage["noise_seeds"] = seeds
     map_cleanup()
 end)
 script.on_event(defines.events.on_cutscene_finished, remove_spaceship_wreck)

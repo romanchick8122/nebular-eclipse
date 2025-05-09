@@ -16,3 +16,30 @@ data:extend(map(hidden_settings.strings, function(opt)
         default_value = opt[2]
     }
 end))
+
+
+data:extend({
+    {
+        type = "double-setting",
+        name = "nebular-eclipse-noise-scale",
+        setting_type = "runtime-global",
+        minimum_value = 1,
+        default_value = 2
+    },{
+        type = "int-setting",
+        name = "nebular-eclipse-noise-octaves",
+        setting_type = "runtime-global",
+        minimum_value = 1,
+        default_value = 4
+    },{
+        type = "double-setting",
+        name = "nebular-eclipse-noise-lacunarity",
+        setting_type = "runtime-global",
+        default_value = 2
+    },{
+        type = "double-setting",
+        name = "nebular-eclipse-noise-persistence",
+        setting_type = "runtime-global",
+        default_value = 0.5
+    },
+})
