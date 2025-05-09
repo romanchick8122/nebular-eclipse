@@ -41,5 +41,18 @@ data:extend({
         name = "nebular-eclipse-noise-persistence",
         setting_type = "runtime-global",
         default_value = 0.5
-    },
+    },{
+        type = "int-setting",
+        name = "nebular-eclipse-voronoi-cells-per-chunk",
+        setting_type = "runtime-global",
+        default_value = 7,
+        minimum_value = 1,
+        maximum_value = 20
+    },{
+        type = "double-setting",
+        name = "nebular-eclipse-voronoi-distortion-impact",
+        setting_type = "runtime-global",
+        default_value = 5,
+        minimum_value = 0
+    }
 })

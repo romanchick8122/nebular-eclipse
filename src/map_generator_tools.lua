@@ -1,4 +1,5 @@
 require("map_gen.noise_source")
+require("map_gen.voronoi")
 require("util")
 
 local default_tile = settings.global["nebular-eclipse-default-tile-name"].value
@@ -22,13 +23,13 @@ function map_cleanup()
         end
     end
     tiles = {}
+    local v = voronoi_init(settings.global["nebular-eclipse-voronoi-cells-per-chunk"].value)
+    local noise_offset_scale = settings.global["nebular-eclipse-voronoi-distortion-impact"].value
     local gettile = function(x, y)
         if x < -1 or x > 0 or y < -1 or y > 0 then
-            if octave_noise(x, y, storage["noise_seeds"]) > 0 then
-                return "out-of-map"
-            else 
-                return default_tile
-            end
+            local noise_vx = octave_noise(x, y, storage["noise_seeds_x"])
+            local noise_vy = octave_noise(x, y, storage["noise_seeds_y"])
+            return voronoi_closest_seed(v, x + noise_vx * noise_offset_scale, y + noise_vy * noise_offset_scale).active and "water" or "grass-1"
         else
             return default_tile
         end
@@ -41,6 +42,11 @@ function map_cleanup()
     game.forces["player"].set_spawn_position({0, 0}, "nauvis")
     surface.set_tiles(tiles)
     surface.destroy_decoratives({{-32, -32},{31, 31}})
+
+
+
+    
+    surface.set_tiles(map(v.seeds[0][0], function(x) return {position=x.pos,name=(x.active and "water" or "grass-1")} end))
 end
 function remove_spaceship_wreck()
     local surface = game.surfaces["nauvis"]
@@ -54,12 +60,16 @@ end
 script.on_event(defines.events.on_cutscene_started, function()
     local int_max = 2^31 - 1 + 2^31
     storage["main_rng"] = game.create_random_generator()
-    storage["tile_seed"] = storage["main_rng"](int_max)
-    local seeds = {}
-    for i=0,settings.global["nebular-eclipse-noise-octaves"].value do
-        table.insert(seeds, storage["main_rng"](int_max))
+    local function gen_seeds(count)
+        local seeds = {}
+        for i=1,count do
+            table.insert(seeds, storage["main_rng"](int_max))
+        end
+        return seeds
     end
-    storage["noise_seeds"] = seeds
+    storage["noise_seeds_x"] = gen_seeds(settings.global["nebular-eclipse-noise-octaves"].value)
+    storage["noise_seeds_y"] = gen_seeds(settings.global["nebular-eclipse-noise-octaves"].value)
+    storage["voronoi_rng"] = game.create_random_generator(storage["main_rng"](int_max))
     map_cleanup()
 end)
 script.on_event(defines.events.on_cutscene_finished, remove_spaceship_wreck)
