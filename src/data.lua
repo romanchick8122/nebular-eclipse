@@ -1,7 +1,7 @@
-local umberima_empty_expand = {
+data:extend{{
     type = "technology",
-    name = "umberima-empty-expand",
-    icon = "__umberima__/graphics/umberima-empty-expand.png",
+    name = "nebular-eclipse-empty-expand",
+    icon = "__nebular-eclipse__/graphics/nebular-eclipse-empty-expand.png",
     icon_size = 256,
     upgrade = true,
     unit = {
@@ -11,5 +11,4 @@ local umberima_empty_expand = {
     },
     max_level = "infinite",
     show_levels_info = true
-}
-data:extend{umberima_empty_expand}
+}}
