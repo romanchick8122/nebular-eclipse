@@ -52,5 +52,4 @@ function create_land_chunk(surface, tiles)
         return {position = item[1], name=tile_type}
     end)
     game.surfaces[surface].set_tiles(tiles_upd, true, false)
-    -- game.surfaces[surface].set_tiles(map(tiles, function(pos) return {position=pos,name="grass-1"} end), true, false)
 end
