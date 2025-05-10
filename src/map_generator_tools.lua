@@ -1,5 +1,6 @@
 require("map_gen.noise_source")
 require("map_gen.voronoi")
+require("map_gen.chunk_presets.base")
 require("util")
 
 local default_tile = settings.global["nebular-eclipse-default-tile-name"].value
@@ -18,14 +19,6 @@ function map_cleanup()
         no_enemies_mode = true
     }
     game.forces["player"].set_spawn_position({0, 0}, "nauvis")
-end
-function remove_spaceship_wreck()
-    local surface = game.surfaces["nauvis"]
-    for _, e in ipairs(surface.find_entities()) do
-        if e.type ~= "character" then
-            e.destroy()
-        end
-    end
 end
 
 script.on_event(defines.events.on_chunk_generated, function(e)
@@ -52,12 +45,24 @@ script.on_event(defines.events.on_player_created, function()
     storage["voronoi_rng"] = game.create_random_generator(storage["main_rng"](int_max))
     map_cleanup()
 
-    local surface = game.surfaces["nauvis"]
-    local v = voronoi_init(settings.global["nebular-eclipse-voronoi-cells-per-chunk"].value)
+    storage["surface_data"] = {
+        ["nauvis"] = {
+            voronoi = voronoi_init(settings.global["nebular-eclipse-voronoi-cells-per-chunk"].value)
+        }
+    }
     commands.add_command("ne-add-area", nil, function(command)
-        local tiles = voronoi_get_map_expansion_tiles(v)
-        surface.set_tiles(map(tiles, function(pos) return {position=pos,name=command.parameter} end), true, false)
+        create_land_chunk("nauvis", voronoi_get_map_expansion_tiles(storage["surface_data"]["nauvis"].voronoi))
     end)
 end)
+
+
+local function remove_spaceship_wreck()
+    local surface = game.surfaces["nauvis"]
+    for _, e in ipairs(surface.find_entities()) do
+        if e.type ~= "character" then
+            e.destroy()
+        end
+    end
+end
 script.on_event(defines.events.on_cutscene_finished, remove_spaceship_wreck)
 script.on_event(defines.events.on_cutscene_cancelled, remove_spaceship_wreck)
