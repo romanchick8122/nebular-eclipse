@@ -60,5 +60,12 @@ data:extend({
         setting_type = "runtime-global",
         default_value = 5,
         minimum_value = 1
+    },{
+        type = "double-setting",
+        name = "nebular-eclipse-trees-per-chunk",
+        setting_type = "runtime-global",
+        default_value = 0.45,
+        minimum_value = 0,
+        maximum_value = 1
     }
 })

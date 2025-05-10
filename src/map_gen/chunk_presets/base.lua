@@ -49,7 +49,29 @@ function create_land_chunk(surface, tiles)
         elseif (item[2] == 2) then tile_type = "grass-1"
         else tile_type = "water"
         end
-        return {position = item[1], name=tile_type}
+        return {position = item[1], name = tile_type}
     end)
     game.surfaces[surface].set_tiles(tiles_upd, true, false)
+end
+function create_tree_chunk(surface, tiles)
+    local preset = math.random(1,3)
+    local trees_preset = {"tree-01", "tree-03", "tree-06"}
+    local grasses_preset = {"grass-3", "grass-1", "grass-4"}
+    local tiles_distanced = compute_edge_distance(tiles)
+    local tiles_upd = map(tiles_distanced, function (item)
+        local tile_type = nil
+        if (item[2] == 0) then tile_type = "brown-refined-concrete"
+        else tile_type = grasses_preset[preset]
+        end
+        return {position = item[1], name = tile_type}
+    end)
+    game.surfaces[surface].set_tiles(tiles_upd, true, false)
+    local perlin_seed = storage["tree_gen_white_seed"]
+    local white_seed = storage["tree_gen_perlin_seed"]
+    for index, value in ipairs(tiles_distanced) do
+        if (value[2] >= 2) then
+            if ((perlin_noise(value[1][1]/5,value[1][2]/5, perlin_seed)+1)/2 * white_noise(value[1][1],value[1][2],white_seed) >= 1-settings.global["nebular-eclipse-trees-per-chunk"].value) then game.surfaces[surface].create_entity({name = trees_preset[preset], position = value[1]})
+            end            
+        end 
+    end
 end
