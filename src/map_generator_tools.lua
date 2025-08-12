@@ -43,6 +43,8 @@ script.on_event(defines.events.on_player_created, function()
     storage["noise_seeds_x"] = gen_seeds(settings.global["nebular-eclipse-noise-octaves"].value)
     storage["noise_seeds_y"] = gen_seeds(settings.global["nebular-eclipse-noise-octaves"].value)
     storage["voronoi_rng"] = game.create_random_generator(storage["main_rng"](int_max))
+    storage["tree_gen_white_seed"] = storage["main_rng"](int_max)
+    storage["tree_gen_perlin_seed"] = storage["main_rng"](int_max)
     map_cleanup()
 
     storage["surface_data"] = {
@@ -52,6 +54,9 @@ script.on_event(defines.events.on_player_created, function()
     }
     commands.add_command("ne-add-area", nil, function(command)
         create_land_chunk("nauvis", voronoi_get_map_expansion_tiles(storage["surface_data"]["nauvis"].voronoi))
+    end)
+    commands.add_command("ne-add-tree", nil, function (command)
+        create_tree_chunk("nauvis", voronoi_get_map_expansion_tiles(storage["surface_data"]["nauvis"].voronoi))
     end)
 end)
 
